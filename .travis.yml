@@ -22,14 +22,14 @@ addons:
 install:
   # Install ansible
   - pip install ansible molecule yamllint ansible-lint docker
-  - ansible-galaxy install -r requirements.yml
+  - ansible-galaxy install --roles-path . geerlingguy.postgresql
 
   # Check ansible & molecule version
   - ansible --version
   #- molecule --version
 
   # Create ansible.cfg with correct roles_path
-  # - printf '[defaults]\nroles_path=../' >ansible.cfg
+  - printf '[defaults]\nroles_path=/home/travis/.ansible/roles' >ansible.cfg
 
 script:
   # Basic role syntax check
