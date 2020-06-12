@@ -22,6 +22,7 @@ addons:
 install:
   # Install ansible
   - pip install ansible molecule yamllint ansible-lint docker
+  - ansible-galaxy install -r requirements.yml
 
   # Check ansible & molecule version
   - ansible --version
