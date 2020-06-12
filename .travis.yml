@@ -30,6 +30,7 @@ install:
 
   # Create ansible.cfg with correct roles_path
   - printf '[defaults]\nroles_path=../' >ansible.cfg
+  - geerlingguy.postgresql
 
 script:
   # Basic role syntax check
