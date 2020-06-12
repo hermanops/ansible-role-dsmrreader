@@ -1,0 +1,6 @@
+---
+# handlers file for ansible-role-dsmrreader
+- name: restart postgresql
+  service:
+    name: postgresql
+    state: started

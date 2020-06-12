@@ -1,0 +1,22 @@
+galaxy_info:
+  author: HermanOps
+  description: Home Automater
+  company: Two Productions
+
+  license: license (BSD, MIT)
+
+  min_ansible_version: 2.9
+
+  # If this a Container Enabled role, provide the minimum Ansible Container version.
+  # min_ansible_container_version:
+
+  platforms:
+  - name: Ubuntu
+    versions:
+    - 20.04
+
+  galaxy_tags:
+    - dsmrreader
+
+dependencies:
+  - { role: geerlingguy.postgresql_temp }

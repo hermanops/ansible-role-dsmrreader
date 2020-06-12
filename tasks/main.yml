@@ -1,0 +1,184 @@
+---
+# tasks file for ansible-role-dsmrreader
+
+- name: Update apt cache if needed.
+  apt:
+    update_cache: true
+    cache_valid_time: 86400
+- name: install the needed software to run dsmr-reader
+  package:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - "{{ dsmr_dependencies }}"
+
+# Include the Postgresql role
+- name: include the postgresql role to configure the user and password and database.
+  include_role:
+    name: geerlingguy.postgresql_temp
+
+# System user
+- name: add the dsmr system user
+  user:
+    name: dsmr
+    shell: /bin/bash
+    groups: dialout
+
+# Nginx
+- name: create the directory for static files used by Nginx
+  file:
+    path: /var/www/dsmrreader/static
+    state: directory
+    owner: dsmr
+    group: dsmr
+
+# Code checkout
+- name: git clone the software
+  git:
+    repo: https://github.com/dennissiemensma/dsmr-reader.git
+    dest: /home/dsmr/dsmr-reader
+    version: v3
+
+- name: set user and group on directories
+  file:
+    path: "{{ item }}"
+    recurse: yes
+    group: dsmr
+    owner: dsmr
+  loop:
+    - "/home/dsmr/"
+    - "/var/www/dsmrreader/"
+
+# Virtual env
+- name: create the virtualenvs dir
+  file:
+    path: "/home/dsmr/.virtualenvs"
+    state: directory
+    owner: dsmr
+    group: dsmr
+- name: run virtualenv create command
+  pip:
+    requirements: /home/dsmr/dsmr-reader/dsmrreader/provisioning/requirements/base.txt
+    virtualenv: "/home/dsmr/.virtualenvs/dsmrreader"
+    virtualenv_python: python3
+  become: true
+  become_user: dsmr
+  # shell:
+  #   "/usr/bin/virtualenv /home/dsmr/.virtualenvs/dsmrreader --python python3"
+  # become: true
+  # become_user: dsmr
+  # changed_when: false
+- name: add virtualenv to users .bashrc
+  lineinfile:
+    path: /home/dsmr/.bashrc
+    regexp: '^source ~/.virtualenvs/dsmrreader/bin/activate'
+    line: 'source ~/.virtualenvs/dsmrreader/bin/activate'
+  become: true
+  become_user: dsmr
+- name: activate virtualenv every time the user will login.
+  lineinfile:
+    path: /home/dsmr/.bashrc
+    regexp: '^cd ~/dsmr-reader'
+    line: 'cd ~/dsmr-reader'
+  become: true
+  become_user: dsmr
+
+# Config & requirements
+- name: copy django-databse settings file
+  copy:
+    src: /home/dsmr/dsmr-reader/dsmrreader/provisioning/django/postgresql.py
+    dest: /home/dsmr/dsmr-reader/dsmrreader/settings.py
+    remote_src: true
+  become: true
+  become_user: dsmr
+- name: install everything from requirements file
+  shell: >
+    /home/dsmr/.virtualenvs/dsmrreader/bin/pip3 install -r
+    /home/dsmr/dsmr-reader/dsmrreader/provisioning/requirements/base.txt
+    -r /home/dsmr/dsmr-reader/dsmrreader/provisioning/requirements/postgresql.txt
+  become: true
+  become_user: dsmr
+  changed_when: false
+
+# Setup
+- name: database initialization
+  shell:
+    "/home/dsmr/.virtualenvs/dsmrreader/bin/python3 /home/dsmr/dsmr-reader/manage.py migrate"
+  become: true
+  become_user: dsmr
+  changed_when: false
+- name: synchronize static files
+  shell:
+    "/home/dsmr/.virtualenvs/dsmrreader/bin/python3 /home/dsmr/dsmr-reader/manage.py collectstatic --noinput"
+  become: true
+  become_user: dsmr
+  changed_when: false
+
+# Nginx
+- name: remove standard nginx vhost config
+  file:
+    path: /etc/nginx/sites-enabled/default
+    state: absent
+- name: place dsm-reader vhost config
+  copy:
+    src: /home/dsmr/dsmr-reader/dsmrreader/provisioning/nginx/dsmr-webinterface
+    dest: /etc/nginx/sites-available/
+    remote_src: true
+- name: create symbolic link for nginx to use dsmr-reader config
+  file:
+    src: /etc/nginx/sites-available/dsmr-webinterface
+    dest: /etc/nginx/sites-enabled/dsmr-webinterface
+    state: link
+- name: test nginx config
+  shell:
+    service nginx configtest
+  register: result
+  changed_when: "result.rc != 0"
+  args:
+    warn: false
+- name: restart nginx
+  service:
+    name: nginx
+    state: reloaded
+
+# Supervisor
+- name: copy supervisor configfiles for dsmr
+  copy:
+    src: "{{ item }}"
+    dest: /etc/supervisor/conf.d/
+    remote_src: true
+  loop:
+    - /home/dsmr/dsmr-reader/dsmrreader/provisioning/supervisor/dsmr_datalogger.conf
+    - /home/dsmr/dsmr-reader/dsmrreader/provisioning/supervisor/dsmr_backend.conf
+    - /home/dsmr/dsmr-reader/dsmrreader/provisioning/supervisor/dsmr_webinterface.conf
+- name: enable service supervisord and start it
+  systemd:
+    name: supervisor
+    enabled: yes
+    state: started
+- name: reread supervisor configfiles
+  supervisorctl:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - dsmr_webinterface
+    - dsmr_backend
+    - dsmr_datalogger
+- name: update the supervisor running configuration
+  supervisorctl:
+    name: "{{ item }}"
+    state: restarted
+  loop:
+    - dsmr_webinterface
+    - dsmr_backend
+    - dsmr_datalogger
+
+# Create application user
+- name: create application user (this task is not idempotent yet...)
+  expect:
+    command: "/home/dsmr/.virtualenvs/dsmrreader/bin/python3 /home/dsmr/dsmr-reader/manage.py createsuperuser --username admin --email root@localhost"
+    responses:
+      (?i)password: "{{  adminpass | quote }}"
+  become: true
+  become_user: dsmr
+  no_log: true
