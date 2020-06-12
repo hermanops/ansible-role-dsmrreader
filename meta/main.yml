@@ -19,4 +19,4 @@ galaxy_info:
     - dsmrreader
 
 dependencies:
-  - { role: geerlingguy.postgresql_temp }
+  - { role: geerlingguy.postgresql }
