@@ -9,21 +9,14 @@
       - name: dsmrreader
       - password: dsmrreader
     ansible_ssh_pipelining: true
+
   pre_tasks:
     - name: Update apt cache.
       apt:
         update_cache: true
         cache_valid_time: 3600
       changed_when: false
-    - name: fix geerlingguy.postgresql not working correctly
-      postgresql_privs:
-        db: postgres
-        privs: ALL
-        type: database
-        obj: thedb
-        role: theuser
-      become: yes
-      become_user: postgres
+
   tasks:
     - name: "Include ansible-role-dsmrreader"
       include_role:
