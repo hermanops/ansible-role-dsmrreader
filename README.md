@@ -15,7 +15,7 @@ see requirements.yml
 Role Variables
 --------------
 
-Create a directory vars. Create a file called geerlingguy.postgresql_temp.yml.
+Create a directory vars. Create a file called geerlingguy.postgresql.yml.
 Include the folling in that file:
 
 ```yaml
@@ -55,7 +55,7 @@ Example Playbook
       - adminpass: dsmrreader
     pre_tasks:
     - name: include variables for the geerlingguy role
-      include_vars: geerlingguy.postgresql_temp.yml
+      include_vars: geerlingguy.postgresql.yml
       roles:
         - { role: role: ansible-role-dsmrreader }
 

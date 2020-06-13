@@ -15,7 +15,7 @@
 # Include the Postgresql role
 - name: include the postgresql role to configure the user and password and database.
   include_role:
-    name: geerlingguy.postgresql_temp
+    name: geerlingguy.postgresql
 
 # System user
 - name: add the dsmr system user

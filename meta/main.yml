@@ -14,7 +14,7 @@ galaxy_info:
   # min_ansible_container_version:
 
   platforms:
-  - name: Ubuntu
+  - name: ubuntu
     versions:
     - 20.04
 
