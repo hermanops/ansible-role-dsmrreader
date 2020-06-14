@@ -11,4 +11,4 @@
     state: reloaded
 
 - name: restart supervisord
-  import_tasks: tasks/restart_supervisord.yml
+  import_tasks: restart_supervisord.yml
