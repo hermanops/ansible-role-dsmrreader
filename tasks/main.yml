@@ -181,7 +181,8 @@
       virtualenv: /home/dsmr/.virtualenvs/dsmrreader
     when: not superuser_exists
   - name: check if password script is available
-    stat: /home/dsmr/dsmr-reader/changepassword.sh
+    stat:
+      path: /home/dsmr/dsmr-reader/changepassword.sh
     register: passwd_script_exists
   - name: place password script
     template:
