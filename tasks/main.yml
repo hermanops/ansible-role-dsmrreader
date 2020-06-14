@@ -191,14 +191,14 @@
         msg: 'I caught an error, can do stuff here to fix it, :-)'
 
 # Create application user
-- name: create application user (this task is not idempotent yet...)
-  expect:
-    command: "/home/dsmr/.virtualenvs/dsmrreader/bin/python3 /home/dsmr/dsmr-reader/manage.py createsuperuser --username admin --email root@localhost"
-    responses:
-      (?i)password: "{{  adminpass | quote }}"
-  become: true
-  become_user: dsmr
-  no_log: true
+# - name: create application user (this task is not idempotent yet...)
+#   expect:
+#     command: "/home/dsmr/.virtualenvs/dsmrreader/bin/python3 /home/dsmr/dsmr-reader/manage.py createsuperuser --username admin --email root@localhost"
+#     responses:
+#       (?i)password: "{{  adminpass | quote }}"
+#   become: true
+#   become_user: dsmr
+#   no_log: true
 
 - name: check if Django superuser exists
   command: echo "from django.contrib.auth import get_user_model; User = get_user_model(); print(User.objects.filter(username='admin').count()>0)" | /home/dsmr/.virtualenvs/dsmrreader/bin/python3 /home/dsmr/dsmr-reader/manage.py shell
