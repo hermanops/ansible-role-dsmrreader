@@ -225,7 +225,7 @@
   command:
     /home/dsmr/dsmr-reader/changepassword.sh
   become: true
-  become_user: dsmrreader
+  become_user: dsmr
   args:
     chdir: "/home/dsmr/dsmr-reader/"
   changed_when: false
