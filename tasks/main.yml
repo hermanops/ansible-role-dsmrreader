@@ -139,6 +139,8 @@
     src: /etc/nginx/sites-available/dsmr-webinterface
     dest: /etc/nginx/sites-enabled/dsmr-webinterface
     state: link
+  notify:
+    - restart nginx
 - name: test nginx config
   shell:
     service nginx configtest
@@ -146,10 +148,8 @@
   changed_when: "result.rc != 0"
   args:
     warn: false
-- name: restart nginx
-  service:
-    name: nginx
-    state: reloaded
+  notify:
+    - restart nginx
 
 - name: configure supervisord and restart it
   block:
