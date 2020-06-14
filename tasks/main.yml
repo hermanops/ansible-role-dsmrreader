@@ -212,7 +212,7 @@
   changed_when: false
 - name: Create super user
   django_manage:
-    command: "createsuperuser --noinput --username=admin --email=root@locahost"
+    command: "createsuperuser --noinput --username=admin --email=not-necessary@example.com"
     app_path: /home/dsmr/dsmr-reader/
     virtualenv: /home/dsmr/.virtualenvs/dsmrreader
 
