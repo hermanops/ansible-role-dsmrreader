@@ -9,3 +9,13 @@
   service:
     name: nginx
     state: reloaded
+
+- name: restart supervisord
+  supervisorctl:
+    name: "{{ item.group }}"
+    state: present
+  loop:
+    - { group: dsmr_webinterface }
+    - { group: dsmr_backend }
+    - { group: dsmr_datalogger, reread: "{{ enable_datalogger }}" }
+  when: item.reread | default(True) | bool

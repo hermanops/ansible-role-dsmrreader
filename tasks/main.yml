@@ -151,7 +151,7 @@
   notify:
     - restart nginx
 
-- name: configure supervisord and restart it
+- name: Configure supervisord and restart it
   block:
   - name: copy supervisor configfiles for dsmr
     copy:
@@ -162,21 +162,14 @@
       - { filename: /home/dsmr/dsmr-reader/dsmrreader/provisioning/supervisor/dsmr_datalogger.conf, create: "{{ enable_datalogger }}" }
       - { filename: /home/dsmr/dsmr-reader/dsmrreader/provisioning/supervisor/dsmr_backend.conf }
       - { filename: /home/dsmr/dsmr-reader/dsmrreader/provisioning/supervisor/dsmr_webinterface.conf }
+    notify:
+      - restart supervisord
     when: item.create | default(True) | bool
   - name: enable service supervisord and start it
     systemd:
       name: supervisor
       enabled: yes
       state: started
-  - name: reread supervisor configfiles
-    supervisorctl:
-      name: "{{ item.group }}"
-      state: present
-    loop:
-      - { group: dsmr_webinterface }
-      - { group: dsmr_backend }
-      - { group: dsmr_datalogger, reread: "{{ enable_datalogger }}" }
-    when: item.reread | default(True) | bool
   - name: update the supervisor running configuration
     supervisorctl:
       name: "{{ item.group }}"
@@ -190,46 +183,38 @@
     - debug:
         msg: 'I caught an error, can do stuff here to fix it, :-)'
 
-# Create application user
-# - name: create application user (this task is not idempotent yet...)
-#   expect:
-#     command: "/home/dsmr/.virtualenvs/dsmrreader/bin/python3 /home/dsmr/dsmr-reader/manage.py createsuperuser --username admin --email root@localhost"
-#     responses:
-#       (?i)password: "{{  adminpass | quote }}"
-#   become: true
-#   become_user: dsmr
-#   no_log: true
-
-- name: check if Django superuser exists
-  command: >
-    echo "from django.contrib.auth import get_user_model; User = get_user_model(); print(User.objects.filter(username='admin').count()>0)"
+- name: Create application user and password
+  block:
+  - name: check if Django superuser exists
+    command: >
+     echo "from django.contrib.auth import get_user_model; User = get_user_model(); print(User.objects.filter(username='admin').count()>0)"
      | /home/dsmr/.virtualenvs/dsmrreader/bin/python3 /home/dsmr/dsmr-reader/manage.py shell
-  args:
-    chdir: "/home/dsmr/dsmr-reader/"
-  # environment:
-  #   DJANGO_SETTINGS_MODULE: "{{settings}}"
-  register: superuser_exists
-  changed_when: false
-- name: Create super user
-  django_manage:
-    command: "createsuperuser --noinput --username=admin --email=not-necessary@example.com"
-    app_path: /home/dsmr/dsmr-reader/
-    virtualenv: /home/dsmr/.virtualenvs/dsmrreader
-  when: not superuser_exists
-- name: place password script
-  template:
-    src: changepassword.sh.j2
-    dest: /home/dsmr/dsmr-reader/changepassword.sh
-    mode: 0755
-- name: Change password
-  command:
-    /home/dsmr/dsmr-reader/changepassword.sh
-  become: true
-  become_user: dsmr
-  # args:
-  #   chdir: "/home/dsmr/dsmr-reader/"
-  changed_when: false
-- name: remove changepassword.sh
-  file:
-    path: "/home/dsmr/dsmr-reader/changepassword.sh"
-    state: absent
+    args:
+      chdir: "/home/dsmr/dsmr-reader/"
+    register: superuser_exists
+    changed_when: false
+
+  - name: Create super user
+    django_manage:
+      command: "createsuperuser --noinput --username=admin --email=not-necessary@example.com"
+      app_path: /home/dsmr/dsmr-reader/
+      virtualenv: /home/dsmr/.virtualenvs/dsmrreader
+    when: not superuser_exists
+  - name: place password script
+    template:
+      src: changepassword.sh.j2
+      dest: /home/dsmr/dsmr-reader/changepassword.sh
+      mode: 0755
+  - name: Change password
+    command:
+     /home/dsmr/dsmr-reader/changepassword.sh
+    become: true
+    become_user: dsmr
+    changed_when: false
+  - name: remove changepassword.sh
+    file:
+      path: "/home/dsmr/dsmr-reader/changepassword.sh"
+      state: absent
+  rescue:
+  - debug:
+        msg: 'Django SuperUser not created. Something went wrong.'
