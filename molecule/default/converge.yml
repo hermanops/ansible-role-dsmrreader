@@ -9,7 +9,7 @@
       - name: dsmrreader
         password: dsmrreader
         role_attr_flags: NOCREATEDB,NOSUPERUSER
-        db: dsmrreader
+        # db: dsmrreader
 
     postgres_users_no_log: false
 
