@@ -208,14 +208,14 @@
     chdir: "/home/dsmr/dsmr-reader/"
   # environment:
   #   DJANGO_SETTINGS_MODULE: "{{settings}}"
-  register: superuser_existed
+  register: superuser_exists
   changed_when: false
 - name: Create super user
   django_manage:
     command: "createsuperuser --noinput --username=admin --email=not-necessary@example.com"
     app_path: /home/dsmr/dsmr-reader/
     virtualenv: /home/dsmr/.virtualenvs/dsmrreader
-  when: not superuser_existed
+  when: not superuser_exists
 - name: place password script
   template:
     src: changepassword.sh.j2
