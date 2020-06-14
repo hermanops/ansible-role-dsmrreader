@@ -8,6 +8,9 @@
     postgresql_users:
       - name: dsmrreader
         password: dsmrreader
+        role_attr_flags: NOCREATEDB,NOSUPERUSER
+        db: dsmrreader
+
     postgres_users_no_log: false
 
   pre_tasks:

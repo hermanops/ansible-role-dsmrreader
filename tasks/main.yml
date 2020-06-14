@@ -151,37 +151,41 @@
     name: nginx
     state: reloaded
 
-# Supervisor
-- name: copy supervisor configfiles for dsmr
-  copy:
-    src: "{{ item }}"
-    dest: /etc/supervisor/conf.d/
-    remote_src: true
-  loop:
-    - /home/dsmr/dsmr-reader/dsmrreader/provisioning/supervisor/dsmr_datalogger.conf
-    - /home/dsmr/dsmr-reader/dsmrreader/provisioning/supervisor/dsmr_backend.conf
-    - /home/dsmr/dsmr-reader/dsmrreader/provisioning/supervisor/dsmr_webinterface.conf
-- name: enable service supervisord and start it
-  systemd:
-    name: supervisor
-    enabled: yes
-    state: started
-- name: reread supervisor configfiles
-  supervisorctl:
-    name: "{{ item }}"
-    state: present
-  loop:
-    - dsmr_webinterface
-    - dsmr_backend
-    - dsmr_datalogger
-- name: update the supervisor running configuration
-  supervisorctl:
-    name: "{{ item }}"
-    state: restarted
-  loop:
-    - dsmr_webinterface
-    - dsmr_backend
-    - dsmr_datalogger
+- name: configure supervisord and restart it
+  block:
+  - name: copy supervisor configfiles for dsmr
+    copy:
+      src: "{{ item }}"
+      dest: /etc/supervisor/conf.d/
+      remote_src: true
+    loop:
+      - /home/dsmr/dsmr-reader/dsmrreader/provisioning/supervisor/dsmr_datalogger.conf
+      - /home/dsmr/dsmr-reader/dsmrreader/provisioning/supervisor/dsmr_backend.conf
+      - /home/dsmr/dsmr-reader/dsmrreader/provisioning/supervisor/dsmr_webinterface.conf
+  - name: enable service supervisord and start it
+    systemd:
+      name: supervisor
+      enabled: yes
+      state: started
+  - name: reread supervisor configfiles
+    supervisorctl:
+      name: "{{ item }}"
+      state: present
+    loop:
+      - dsmr_webinterface
+      - dsmr_backend
+      - dsmr_datalogger
+  - name: update the supervisor running configuration
+    supervisorctl:
+      name: "{{ item }}"
+      state: restarted
+    loop:
+      - dsmr_webinterface
+      - dsmr_backend
+      - dsmr_datalogger
+  rescue:
+    - debug:
+        msg: 'I caught an error, can do stuff here to fix it, :-)'
 
 # Create application user
 - name: create application user (this task is not idempotent yet...)
