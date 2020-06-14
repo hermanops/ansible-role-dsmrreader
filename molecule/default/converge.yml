@@ -10,8 +10,9 @@
         password: dsmrreader
         role_attr_flags: NOCREATEDB,NOSUPERUSER
         # db: dsmrreader
-
     postgres_users_no_log: false
+    enable_datalogger: false
+    admin_pass: dsmrreader
 
   pre_tasks:
     - name: Update apt cache.

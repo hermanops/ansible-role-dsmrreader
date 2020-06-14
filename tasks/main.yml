@@ -159,9 +159,10 @@
       dest: /etc/supervisor/conf.d/
       remote_src: true
     loop:
-      - /home/dsmr/dsmr-reader/dsmrreader/provisioning/supervisor/dsmr_datalogger.conf
-      - /home/dsmr/dsmr-reader/dsmrreader/provisioning/supervisor/dsmr_backend.conf
-      - /home/dsmr/dsmr-reader/dsmrreader/provisioning/supervisor/dsmr_webinterface.conf
+      - { /home/dsmr/dsmr-reader/dsmrreader/provisioning/supervisor/dsmr_datalogger.conf, create: "{{ enable_datalogger }}" }
+      - { /home/dsmr/dsmr-reader/dsmrreader/provisioning/supervisor/dsmr_backend.conf }
+      - { /home/dsmr/dsmr-reader/dsmrreader/provisioning/supervisor/dsmr_webinterface.conf }
+    when: item.create | default(True) | bool
   - name: enable service supervisord and start it
     systemd:
       name: supervisor
