@@ -3,4 +3,4 @@
 - name: restart postgresql
   service:
     name: postgresql
-    state: started
+    state: restarted
