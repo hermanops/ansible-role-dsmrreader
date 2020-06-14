@@ -226,8 +226,8 @@
     /home/dsmr/dsmr-reader/changepassword.sh
   become: true
   become_user: dsmr
-  args:
-    chdir: "/home/dsmr/dsmr-reader/"
+  # args:
+  #   chdir: "/home/dsmr/dsmr-reader/"
   changed_when: false
 - name: remove changepassword.sh
   file:

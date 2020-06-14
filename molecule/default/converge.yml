@@ -2,6 +2,7 @@
 - name: Converge
   hosts: all
   become: true
+
   vars:
     postgresql_databases:
       - name: dsmrreader
@@ -10,6 +11,7 @@
         password: dsmrreader
         role_attr_flags: NOCREATEDB,NOSUPERUSER
         # db: dsmrreader
+
     postgres_users_no_log: false
     enable_datalogger: false
     adminpass: dsmrreader
