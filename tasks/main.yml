@@ -213,8 +213,8 @@
     check_mode: true
     when: passwd_script_exists | bool
   - name: Change password
-    command:
-     bash /home/dsmr/dsmr-reader/changepassword.sh
+    shell: >
+     /home/dsmr/dsmr-reader/changepassword.sh
     become: true
     become_user: dsmr
     changed_when: false

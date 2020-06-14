@@ -11,8 +11,7 @@
         password: dsmrreader
         role_attr_flags: NOCREATEDB,NOSUPERUSER
         # db: dsmrreader
-
-    postgres_users_no_log: false
+    postgres_users_no_log: true
     enable_datalogger: false
     adminpass: dsmrreader
 
