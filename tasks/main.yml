@@ -215,15 +215,21 @@
     command: "createsuperuser --noinput --username=admin --email=not-necessary@example.com"
     app_path: /home/dsmr/dsmr-reader/
     virtualenv: /home/dsmr/.virtualenvs/dsmrreader
-
-#   when: not superuser_existed
-# - name: Change password tricks
-#   template: src=changepassword.sh.j2 dest={{django_dir}}/changepassword.sh mode=0755
-# - name: Change password
-#   command: "{{django_dir}}/changepassword.sh"
-#   args:
-#     chdir: "{{django_dir}}"
-#   environment:
-#     DJANGO_SETTINGS_MODULE: "{{settings}}"
-# - name: remove changepassword.sh
-#   file: path="{{django_dir}}/changepassword.sh" state=absent
+  when: not superuser_existed
+- name: place password script
+  template:
+    src: changepassword.sh.j2
+    dest: /home/dsmr/dsmr-reader/changepassword.sh
+    mode: 0755
+- name: Change password
+  command:
+    /home/dsmr/dsmr-reader/changepassword.sh
+  become: true
+  become_user: dsmrreader
+  args:
+    chdir: "/home/dsmr/dsmr-reader/"
+  changed_when: false
+- name: remove changepassword.sh
+  file:
+    path: "/home/dsmr/dsmr-reader/changepassword.sh"
+    state: absent
