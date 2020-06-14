@@ -157,8 +157,29 @@
       - { filename: /home/dsmr/dsmr-reader/dsmrreader/provisioning/supervisor/dsmr_backend.conf }
       - { filename: /home/dsmr/dsmr-reader/dsmrreader/provisioning/supervisor/dsmr_webinterface.conf }
     when: item.create | default(True) | bool
-    notify:
-      - restart supervisord
+  - name: reread config
+    supervisorctl:
+      name: "{{ item.group }}"
+      state: present
+    loop:
+      - { group: dsmr_webinterface }
+      - { group: dsmr_backend }
+      - { group: dsmr_datalogger, reread: "{{ enable_datalogger }}" }
+    when: item.reread | default(True) | bool
+  - name: enable service supervisord and start it
+    systemd:
+      name: supervisor
+      enabled: yes
+      state: started
+  - name: update the supervisor running configuration
+    supervisorctl:
+      name: "{{ item.group }}"
+      state: restarted
+    loop:
+      - { group: dsmr_webinterface }
+      - { group: dsmr_backend }
+      - { group: dsmr_datalogger, restart: "{{ enable_datalogger }}" }
+    when: item.restart | default(True) | bool
   rescue:
     - debug:
         msg: 'I caught an error, can do stuff here to fix it, :-)'
