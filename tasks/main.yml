@@ -214,7 +214,7 @@
     when: passwd_script_exists | bool
   - name: Change password
     command:
-     /home/dsmr/dsmr-reader/changepassword.sh
+     bash /home/dsmr/dsmr-reader/changepassword.sh
     become: true
     become_user: dsmr
     changed_when: false
