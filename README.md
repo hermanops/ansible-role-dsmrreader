@@ -35,7 +35,7 @@ You can change the database name and the userid and password for that database.
 
 For the admin password in the webinterface, you can set a password in the playbook (see example playbook below).
 
-To tell the role if you want to install dsmrreader as a datalogger or not, you can set enable_datalogger to True or False. 
+To tell the role if you want to install dsmrreader as a datalogger or not, you can set enable_datalogger to True or False.
 
 Dependencies
 ------------
@@ -55,7 +55,7 @@ Example Playbook
 
     vars:
       - adminpass: dsmrreader
-      - enable_datalogger: false
+      - enable_datalogger: true
     pre_tasks:
     - name: include variables for the geerlingguy role
       include_vars: geerlingguy.postgresql.yml

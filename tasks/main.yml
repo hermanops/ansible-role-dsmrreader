@@ -199,3 +199,28 @@
   become: true
   become_user: dsmr
   no_log: true
+
+- name: check if Django superuser exists
+  command: echo "from django.contrib.auth import get_user_model; User = get_user_model(); print(User.objects.filter(username='admin').count()>0)" | /home/dsmr/.virtualenvs/dsmrreader/bin/python3 /home/dsmr/dsmr-reader/manage.py shell
+  args:
+    chdir: "/home/dsmr/dsmr-reader/"
+  # environment:
+  #   DJANGO_SETTINGS_MODULE: "{{settings}}"
+  register: superuser_existed
+- name: Create super user
+  django_manage:
+    command: "createsuperuser --noinput --username=admin --email=root@locahost"
+    app_path: /home/dsmr/dsmr-reader/
+    virtualenv: /home/dsmr/.virtualenvs/dsmrreader
+
+#   when: not superuser_existed
+# - name: Change password tricks
+#   template: src=changepassword.sh.j2 dest={{django_dir}}/changepassword.sh mode=0755
+# - name: Change password
+#   command: "{{django_dir}}/changepassword.sh"
+#   args:
+#     chdir: "{{django_dir}}"
+#   environment:
+#     DJANGO_SETTINGS_MODULE: "{{settings}}"
+# - name: remove changepassword.sh
+#   file: path="{{django_dir}}/changepassword.sh" state=absent
