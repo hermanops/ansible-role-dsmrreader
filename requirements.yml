@@ -1,5 +1,6 @@
 # from galaxy
 - src: geerlingguy.postgresql
+  version: master
 
 # # from GitHub, overriding the name and specifying a specific tag
 # - src: https://github.com/kgizdov/ansible-role-postgresql/

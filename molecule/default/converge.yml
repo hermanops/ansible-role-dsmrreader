@@ -3,13 +3,12 @@
   hosts: all
   become: true
   vars:
-    postgres_users_no_log: false
     postgresql_databases:
       - name: dsmrreader
     postgresql_users:
-      - name: dsmrreader
-      - password: dsmrreader
-    ansible_ssh_pipelining: true
+      - name: "dsmrreader"
+      - password: "dsmrreader"
+    postgres_users_no_log: false
 
   pre_tasks:
     - name: Update apt cache.
