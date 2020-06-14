@@ -41,6 +41,7 @@
     state: directory
     owner: dsmr
     group: dsmr
+    recurse: true
 
 # Code checkout
 - name: git clone the software
@@ -48,16 +49,8 @@
     repo: https://github.com/dennissiemensma/dsmr-reader.git
     dest: /home/dsmr/dsmr-reader
     version: v3
-
-- name: set user and group on directories
-  file:
-    path: "{{ item }}"
-    recurse: yes
-    group: dsmr
-    owner: dsmr
-  loop:
-    - "/home/dsmr/"
-    - "/var/www/dsmrreader/"
+  become: true
+  become_user: dsmr
 
 # Virtual env
 - name: create the virtualenvs dir
