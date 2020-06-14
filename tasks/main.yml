@@ -170,20 +170,22 @@
       state: started
   - name: reread supervisor configfiles
     supervisorctl:
-      name: "{{ item }}"
+      name: "{{ item.group }}"
       state: present
     loop:
-      - dsmr_webinterface
-      - dsmr_backend
-      - dsmr_datalogger
+      - { group: dsmr_webinterface }
+      - { group: dsmr_backend }
+      - { group: dsmr_datalogger, reread: "{{ enable_datalogger }}" }
+    when: item.reread | default(True) | bool
   - name: update the supervisor running configuration
     supervisorctl:
-      name: "{{ item }}"
+      name: "{{ item.group }}"
       state: restarted
     loop:
-      - dsmr_webinterface
-      - dsmr_backend
-      - dsmr_datalogger
+      - { group: dsmr_webinterface }
+      - { group: dsmr_backend }
+      - { group: dsmr_datalogger, restart: "{{ enable_datalogger }}" }
+    when: item.restart | default(True) | bool
   rescue:
     - debug:
         msg: 'I caught an error, can do stuff here to fix it, :-)'
