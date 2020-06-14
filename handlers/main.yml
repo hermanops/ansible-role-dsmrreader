@@ -11,4 +11,11 @@
     state: reloaded
 
 - name: restart supervisord
-  import_tasks: restart_supervisord.yml
+  supervisorctl:
+    name: "{{ item.group }}"
+    state: restarted
+  loop:
+    - { group: dsmr_webinterface }
+    - { group: dsmr_backend }
+    - { group: dsmr_datalogger, restart: "{{ enable_datalogger }}" }
+  when: item.restart | default(True) | bool
