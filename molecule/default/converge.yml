@@ -12,7 +12,7 @@
         # db: dsmrreader
     postgres_users_no_log: false
     enable_datalogger: false
-    admin_pass: dsmrreader
+    adminpass: dsmrreader
 
   pre_tasks:
     - name: Update apt cache.
