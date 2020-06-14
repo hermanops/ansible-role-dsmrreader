@@ -6,8 +6,8 @@
     postgresql_databases:
       - name: dsmrreader
     postgresql_users:
-      - name: "dsmrreader"
-      - password: "dsmrreader"
+      - name: dsmrreader
+        password: dsmrreader
     postgres_users_no_log: false
 
   pre_tasks:

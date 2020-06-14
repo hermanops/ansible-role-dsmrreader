@@ -29,6 +29,7 @@ install:
 
   # Create ansible.cfg with correct roles_path
   - printf '[defaults]\nroles_path=/home/travis/.ansible/roles' >ansible.cfg
+  - printf '[defaults]\nallow_world_readable_tmpfiles=True' >ansible.cfg
 
 script:
   # Basic role syntax check
