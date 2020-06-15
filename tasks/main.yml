@@ -214,9 +214,9 @@
     when: not passwd_script_exists | bool
     changed_when: false
   - name: Change password
-    command: ./changepassword.sh
+    command: "./changepassword.sh"
     args:
-      chdir: /home/dsmr/dsmr-reader/
+      chdir: "/home/dsmr/dsmr-reader/"
     become: true
     become_user: dsmr
     changed_when: false
