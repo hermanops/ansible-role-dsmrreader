@@ -189,8 +189,9 @@
   block:
   - name: check if Django superuser exists
     command: >
-     echo "from django.contrib.auth import get_user_model; User = get_user_model(); print(User.objects.filter(username='admin').count()>0)"
-     | /home/dsmr/.virtualenvs/dsmrreader/bin/python3 /home/dsmr/dsmr-reader/manage.py shell
+     shell -c "from django.contrib.auth import get_user_model; User = get_user_model();
+      User.objects.count()==0 or exit(); user=User.objects.create_user('admin', password='{{ adminpass }}');
+      user.is_superuser=True; user.is_staff=True;user.save()"
     args:
       chdir: "/home/dsmr/dsmr-reader/"
     register: superuser_exists
