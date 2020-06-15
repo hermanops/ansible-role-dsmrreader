@@ -59,8 +59,8 @@ Example Playbook
     - name: include variables
       include_vars: main.yml
 
-      roles:
-        - { role: role: ansible-role-dsmrreader }
+    roles:
+      - { role: role: ansible-role-dsmrreader }
 
 ```
 
