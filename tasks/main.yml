@@ -180,6 +180,7 @@
       - { group: dsmr_backend }
       - { group: dsmr_datalogger, restart: "{{ enable_datalogger }}" }
     when: item.restart | default(True) | bool
+    changed_when: false
   rescue:
     - debug:
         msg: 'I caught an error, can do stuff here to fix it, :-)'
