@@ -15,6 +15,7 @@ see requirements.yml
 Role Variables
 --------------
 
+
 Create a directory vars. Create a file called main.yml.
 Include the folling in that file:
 
@@ -56,8 +57,9 @@ Example Playbook
       - adminpass: dsmrreader
       - enable_datalogger: true
     pre_tasks:
-    - name: include variables for the geerlingguy role
+    - name: include variables
       include_vars: main.yml
+
       roles:
         - { role: role: ansible-role-dsmrreader }
 
