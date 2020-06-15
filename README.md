@@ -1,9 +1,8 @@
-[![Build Status](https://travis-ci.org/hermanops/ansible-role-dsmrreader.svg?branch=master)](https://travis-ci.org/hermanops/ansible-role-dsmrreader)
-
 
 Ansible Role: dsmr-reader
 =========
 
+[![Build Status](https://travis-ci.org/hermanops/ansible-role-dsmrreader.svg?branch=master)](https://travis-ci.org/hermanops/ansible-role-dsmrreader)
 Installs dsmr-reader (version 3) on a Ubuntu system. Can also be a raspberry-pi.
 This role is not fully idempotent (yet)...
 
