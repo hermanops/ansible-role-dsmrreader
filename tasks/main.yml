@@ -208,6 +208,8 @@
       src: changepassword.sh.j2
       dest: /home/dsmr/dsmr-reader/changepassword.sh
       mode: 0755
+    become: true
+    become_user: dsmr
     when: not passwd_script_exists | bool
     changed_when: false
   - name: Change password

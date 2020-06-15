@@ -7,7 +7,7 @@ env:
     - ROLE_NAME: dsmrreader
   matrix:
     - MOLECULE_DISTRO: ubuntu2004
-    # - MOLECULE_DISTRO: ubuntu1804
+    - MOLECULE_DISTRO: ubuntu1804
 
 # Use the new container infrastructure
 sudo: false
