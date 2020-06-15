@@ -17,6 +17,7 @@ galaxy_info:
   - name: ubuntu
     versions:
     - focal
+    - bionic
 
   galaxy_tags:
     - dsmrreader
