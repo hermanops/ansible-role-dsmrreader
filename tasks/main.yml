@@ -224,6 +224,7 @@
     file:
       path: "/home/dsmr/dsmr-reader/changepassword.sh"
       state: absent
+    changed_when: false
   rescue:
   - debug:
         msg: 'Django SuperUser not created. Something went wrong.'
