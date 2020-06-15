@@ -213,6 +213,7 @@
       mode: 0755
     check_mode: true
     when: not passwd_script_exists | bool
+    changed_when: false
   - name: Change password
     command: ./changepassword.sh
     args:
