@@ -14,7 +14,6 @@ see requirements.yml
 Role Variables
 --------------
 
-
 Create a directory vars. Create a file called main.yml.
 Include the folling in that file:
 
