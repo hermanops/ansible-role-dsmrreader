@@ -187,31 +187,14 @@
 
 - name: Create application user and password
   block:
-  # - name: check if Django superuser exists
-  #   command: >
-  #    shell -c "from django.contrib.auth import get_user_model; User = get_user_model();
-  #     User.objects.count()==0 or exit(); user=User.objects.create_user('admin', password='{{ adminpass }}');
-  #     user.is_superuser=True; user.is_staff=True;user.save()"
-  #   args:
-  #     chdir: "/home/dsmr/dsmr-reader/"
-  #   register: superuser_exists
-  #   become: true
-  #   become_user: dsmr
-  #   changed_when: false
-
-  # - name: Create super user
-  #   django_manage:
-  #     command: "createsuperuser --noinput --username=admin --email=not-necessary@example.com"
-  #     app_path: /home/dsmr/dsmr-reader/
-  #     virtualenv: /home/dsmr/.virtualenvs/dsmrreader
-  #   when: not superuser_exists
-  #   become: true
-  #   become_user: dsmr
   - name: check if Django SuperUser exists, if not create it.
     django_manage:
-      command: shell -c "from django.contrib.auth import get_user_model; MyUser = get_user_model(); MyUser.objects.filter( username__exact = '{{ django_superuser_username }}' ).count() == 0 or exit(); new_super_user = MyUser( username = '{{ django_superuser_username }}', password='{{ django_superuser_password }}', email='{{ django_superuser_email }}', is_superuser = True, is_staff = True ); new_super_user.save();"
+      command: shell -c "from django.contrib.auth import get_user_model; MyUser = get_user_model(); MyUser.objects.filter( username__exact = 'admin' ).count() == 0 or exit(); new_super_user = MyUser( username = 'admin', password='{{ adminpass }}', email='non-existent@example.com', is_superuser = True, is_staff = True ); new_super_user.save();"
       app_path: "/home/dsmr/dsmr-reader/"
       virtualenv: "/home/dsmr/.virtualenvs/dsmrreader/"
+    become: true
+    become_user: dsmr
+    tags: superuser
   - name: check if password script is available
     stat:
       path: /home/dsmr/dsmr-reader/changepassword.sh
