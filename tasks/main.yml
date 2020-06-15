@@ -15,7 +15,17 @@
 # Include the Postgresql role
 - name: include the postgresql role to configure the user and password and database.
   include_role:
-    name: geerlingguy.postgresql_temp
+    name: geerlingguy.postgresql
+
+- name: fix geerlingguy.postgresql not working correctly
+  postgresql_privs:
+    db: dsmrreader
+    privs: ALL
+    type: database
+    obj: dsmrreader
+    role: dsmrreader
+  become: yes
+  become_user: postgres
 
 # System user
 - name: add the dsmr system user
@@ -31,6 +41,8 @@
     state: directory
     owner: dsmr
     group: dsmr
+    recurse: true
+  changed_when: false
 
 # Code checkout
 - name: git clone the software
@@ -38,16 +50,8 @@
     repo: https://github.com/dennissiemensma/dsmr-reader.git
     dest: /home/dsmr/dsmr-reader
     version: v3
-
-- name: set user and group on directories
-  file:
-    path: "{{ item }}"
-    recurse: yes
-    group: dsmr
-    owner: dsmr
-  loop:
-    - "/home/dsmr/"
-    - "/var/www/dsmrreader/"
+  become: true
+  become_user: dsmr
 
 # Virtual env
 - name: create the virtualenvs dir
@@ -129,6 +133,8 @@
     src: /etc/nginx/sites-available/dsmr-webinterface
     dest: /etc/nginx/sites-enabled/dsmr-webinterface
     state: link
+  notify:
+    - restart nginx
 - name: test nginx config
   shell:
     service nginx configtest
@@ -136,49 +142,88 @@
   changed_when: "result.rc != 0"
   args:
     warn: false
-- name: restart nginx
-  service:
-    name: nginx
-    state: reloaded
+  notify:
+    - restart nginx
 
-# Supervisor
-- name: copy supervisor configfiles for dsmr
-  copy:
-    src: "{{ item }}"
-    dest: /etc/supervisor/conf.d/
-    remote_src: true
-  loop:
-    - /home/dsmr/dsmr-reader/dsmrreader/provisioning/supervisor/dsmr_datalogger.conf
-    - /home/dsmr/dsmr-reader/dsmrreader/provisioning/supervisor/dsmr_backend.conf
-    - /home/dsmr/dsmr-reader/dsmrreader/provisioning/supervisor/dsmr_webinterface.conf
-- name: enable service supervisord and start it
-  systemd:
-    name: supervisor
-    enabled: yes
-    state: started
-- name: reread supervisor configfiles
-  supervisorctl:
-    name: "{{ item }}"
-    state: present
-  loop:
-    - dsmr_webinterface
-    - dsmr_backend
-    - dsmr_datalogger
-- name: update the supervisor running configuration
-  supervisorctl:
-    name: "{{ item }}"
-    state: restarted
-  loop:
-    - dsmr_webinterface
-    - dsmr_backend
-    - dsmr_datalogger
+- name: Configure supervisord and restart it
+  block:
+  - name: copy supervisor configfiles for dsmr
+    copy:
+      src: "{{ item.filename }}"
+      dest: /etc/supervisor/conf.d/
+      remote_src: true
+    loop:
+      - { filename: /home/dsmr/dsmr-reader/dsmrreader/provisioning/supervisor/dsmr_datalogger.conf, create: "{{ enable_datalogger }}" }
+      - { filename: /home/dsmr/dsmr-reader/dsmrreader/provisioning/supervisor/dsmr_backend.conf }
+      - { filename: /home/dsmr/dsmr-reader/dsmrreader/provisioning/supervisor/dsmr_webinterface.conf }
+    when: item.create | default(True) | bool
+  - name: enable service supervisord and start it
+    systemd:
+      name: supervisor
+      enabled: yes
+      state: started
+  - name: reread config
+    supervisorctl:
+      name: "{{ item.group }}"
+      state: present
+    loop:
+      - { group: dsmr_webinterface }
+      - { group: dsmr_backend }
+      - { group: dsmr_datalogger, reread: "{{ enable_datalogger }}" }
+    when: item.reread | default(True) | bool
+  - name: update the supervisor running configuration
+    supervisorctl:
+      name: "{{ item.group }}"
+      state: restarted
+    loop:
+      - { group: dsmr_webinterface }
+      - { group: dsmr_backend }
+      - { group: dsmr_datalogger, restart: "{{ enable_datalogger }}" }
+    when: item.restart | default(True) | bool
+    changed_when: false
+  rescue:
+    - debug:
+        msg: 'I caught an error, can do stuff here to fix it, :-)'
 
-# Create application user
-- name: create application user (this task is not idempotent yet...)
-  expect:
-    command: "/home/dsmr/.virtualenvs/dsmrreader/bin/python3 /home/dsmr/dsmr-reader/manage.py createsuperuser --username admin --email root@localhost"
-    responses:
-      (?i)password: "{{  adminpass | quote }}"
-  become: true
-  become_user: dsmr
-  no_log: true
+- name: Create application user and password
+  block:
+  - name: check if Django superuser exists
+    command: >
+     echo "from django.contrib.auth import get_user_model; User = get_user_model(); print(User.objects.filter(username='admin').count()>0)"
+     | /home/dsmr/.virtualenvs/dsmrreader/bin/python3 /home/dsmr/dsmr-reader/manage.py shell
+    args:
+      chdir: "/home/dsmr/dsmr-reader/"
+    register: superuser_exists
+    changed_when: false
+
+  - name: Create super user
+    django_manage:
+      command: "createsuperuser --noinput --username=admin --email=not-necessary@example.com"
+      app_path: /home/dsmr/dsmr-reader/
+      virtualenv: /home/dsmr/.virtualenvs/dsmrreader
+    when: not superuser_exists
+  - name: check if password script is available
+    stat:
+      path: /home/dsmr/dsmr-reader/changepassword.sh
+    register: passwd_script_exists
+  - name: place password script
+    template:
+      src: changepassword.sh.j2
+      dest: /home/dsmr/dsmr-reader/changepassword.sh
+      mode: 0755
+    check_mode: true
+    when: passwd_script_exists | bool
+  - name: Change password
+    command: ./changepassword.sh
+    args:
+      chdir: /home/dsmr/dsmr-reader/
+    become: true
+    become_user: dsmr
+    changed_when: false
+  - name: remove changepassword.sh
+    file:
+      path: "/home/dsmr/dsmr-reader/changepassword.sh"
+      state: absent
+  rescue:
+  - debug:
+        msg: 'Django SuperUser not created. Something went wrong.'

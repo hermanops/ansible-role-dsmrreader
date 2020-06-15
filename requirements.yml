@@ -1,8 +1,8 @@
 # from galaxy
-# geerlingguy.postgresql gives an error, see https://github.com/kgizdov/ansible-role-postgresql/tree/chicken_or_egg_user_db
-# - src: geerlingguy.postgresql
+- src: geerlingguy.postgresql
+  version: master
 
-# from GitHub, overriding the name and specifying a specific tag
-- src: https://github.com/kgizdov/ansible-role-postgresql/
-  version: chicken_or_egg_user_db
-  name: geerlingguy.postgresql_temp
+# # from GitHub, overriding the name and specifying a specific tag
+# - src: https://github.com/kgizdov/ansible-role-postgresql/
+#   version: chicken_or_egg_user_db
+#   name: geerlingguy.postgresql_temp

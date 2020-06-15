@@ -2,12 +2,26 @@
 - name: Converge
   hosts: all
   become: true
+
+  vars:
+    postgresql_databases:
+      - name: dsmrreader
+    postgresql_users:
+      - name: dsmrreader
+        password: dsmrreader
+        role_attr_flags: NOCREATEDB,NOSUPERUSER
+        # db: dsmrreader
+    postgres_users_no_log: true
+    enable_datalogger: false
+    adminpass: dsmrreader
+
   pre_tasks:
     - name: Update apt cache.
-      apt: 
+      apt:
         update_cache: true
         cache_valid_time: 3600
       changed_when: false
+
   tasks:
     - name: "Include ansible-role-dsmrreader"
       include_role:
