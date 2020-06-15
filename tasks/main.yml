@@ -211,9 +211,8 @@
       src: changepassword.sh.j2
       dest: /home/dsmr/dsmr-reader/changepassword.sh
       mode: 0755
-    check_mode: true
     when: not passwd_script_exists | bool
-
+    changed_when: false
   - name: Change password
     command: ./changepassword.sh
     args:
@@ -225,6 +224,7 @@
     file:
       path: "/home/dsmr/dsmr-reader/changepassword.sh"
       state: absent
+    changed_when: false
   rescue:
   - debug:
         msg: 'Django SuperUser not created. Something went wrong.'
