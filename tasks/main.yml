@@ -194,6 +194,8 @@
     args:
       chdir: "/home/dsmr/dsmr-reader/"
     register: superuser_exists
+    become: true
+    become_user: dsmr
     changed_when: false
 
   - name: Create super user
@@ -202,6 +204,8 @@
       app_path: /home/dsmr/dsmr-reader/
       virtualenv: /home/dsmr/.virtualenvs/dsmrreader
     when: not superuser_exists
+    become: true
+    become_user: dsmr
   - name: check if password script is available
     stat:
       path: /home/dsmr/dsmr-reader/changepassword.sh
@@ -214,9 +218,9 @@
     when: not passwd_script_exists | bool
     changed_when: false
   - name: Change password
-    command: ./changepassword.sh
+    command: "./changepassword.sh"
     args:
-      chdir: /home/dsmr/dsmr-reader/
+      chdir: "/home/dsmr/dsmr-reader/"
     become: true
     become_user: dsmr
     changed_when: false
