@@ -4,7 +4,7 @@ Ansible Role: dsmr-reader
 
 [![Build Status](https://travis-ci.org/hermanops/ansible-role-dsmrreader.svg?branch=master)](https://travis-ci.org/hermanops/ansible-role-dsmrreader)
 
-Installs dsmr-reader (version 3) on a Ubuntu system. Can also be a raspberry-pi. I've tested it with Raspbian Linux 10 (buster)
+Installs dsmr-reader (version 3) on a Ubuntu system ( see https://github.com/dennissiemensma/dsmr-reader ). Can also be a raspberry-pi. I've tested it with Raspbian Linux 10 (buster)
 This role is not fully idempotent (yet)...
 
 Requirements
