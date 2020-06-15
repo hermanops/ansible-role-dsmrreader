@@ -212,7 +212,8 @@
       dest: /home/dsmr/dsmr-reader/changepassword.sh
       mode: 0755
     check_mode: true
-    when: passwd_script_exists | bool
+    when: not passwd_script_exists | bool
+
   - name: Change password
     command: ./changepassword.sh
     args:
