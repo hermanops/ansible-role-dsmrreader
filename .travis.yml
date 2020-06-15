@@ -2,6 +2,15 @@
 language: python
 services: docker
 
+# blocklist
+branches:
+  except:
+  - legacy
+  - experimental
+  only:
+  - master
+  - develop
+
 env:
   global:
     - ROLE_NAME: dsmrreader
