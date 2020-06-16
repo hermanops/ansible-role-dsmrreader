@@ -2,6 +2,15 @@
 language: python
 services: docker
 
+# blocklist
+branches:
+  except:
+  - legacy
+  - experimental
+  only:
+  - master
+  - develop
+
 env:
   global:
     - ROLE_NAME: dsmrreader
@@ -11,6 +20,9 @@ env:
 
 # Use the new container infrastructure
 sudo: false
+
+cache:
+  - pip
 
 # Install ansible
 addons:
