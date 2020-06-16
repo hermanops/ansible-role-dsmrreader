@@ -21,6 +21,9 @@ env:
 # Use the new container infrastructure
 sudo: false
 
+cache:
+  - pip
+
 # Install ansible
 addons:
   apt:
