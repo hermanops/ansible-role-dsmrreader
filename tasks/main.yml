@@ -226,4 +226,16 @@
     changed_when: false
   rescue:
   - debug:
-        msg: 'Django SuperUser not created. Something went wrong.'
+      msg: 'Django SuperUser not created. Something went wrong.'
+
+- name: check if the webapp is up and running
+  block:
+  - name: check if Django is running on port 80 (HTTP)?
+    wait_for:
+      host: '{{ inventory_hostname }}'
+      port: 80
+      state: started
+      timeout: 30
+  rescue:
+  - debug:
+      msg: 'Django is down. Install failed.'
