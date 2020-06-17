@@ -232,7 +232,7 @@
   block:
   - name: check if Django is running on port 80 (HTTP)?
     wait_for:
-      host: '{{ inventory_hostname }}'
+      host: localhost
       port: 80
       state: started
       timeout: 30
