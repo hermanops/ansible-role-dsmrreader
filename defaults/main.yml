@@ -18,3 +18,4 @@ dsmr_dependencies:
   - cu
   - python3-pexpect
   - expect
+  - python3-psycopg2
